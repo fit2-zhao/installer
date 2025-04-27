@@ -61,12 +61,13 @@ pipeline {
 
                             // 触发社区版构建工作流
                             echo "开始触发社区版构建工作流..."
-                            def ceResponse = sh(script: '''
-                                curl -X POST -H "Authorization: Bearer $TOKEN" \
-                                -H "Accept: application/vnd.github.v3+json" \
-                                ''' + ceWorkflowApi + ''' \
-                                -d '{"ref":"main", "inputs":{"dockerImageTag":"$RELEASE", "architecture":"linux/amd64", "registry":"fit2cloud-registry","EXECUTE_START_SCRIP":"false"}}'
-                            ''', returnStatus: true)
+                            def ceResponse = sh(script: """
+                                               curl -X POST -H "Authorization: Bearer $TOKEN" \\
+                                                    -H "Accept: application/vnd.github.v3+json" \\
+                                                    ${ceWorkflowApi} \\
+                                                    -d '{ "ref":"main", "inputs":{"dockerImageTag":"${RELEASE}", "architecture":"linux/amd64", "registry":"fit2cloud-registry","EXECUTE_START_SCRIP":"false"}}'
+                                             """, returnStatus: true)
+
 
                             if (ceResponse != 0) {
                                 error "社区版镜像构建工作流触发失败"
@@ -106,12 +107,12 @@ pipeline {
                             // 确认社区版构建成功后，触发企业版构建工作流
                             if (ceBuildSuccess) {
                                 echo "开始触发企业版构建工作流..."
-                                def eeResponse = sh(script: '''
-                                    curl -X POST -H "Authorization: Bearer $TOKEN" \
-                                    -H "Accept: application/vnd.github.v3+json" \
-                                    ''' + eeWorkflowApi + ''' \
-                                    -d '{"ref":"main", "inputs":{"dockerImageTag":"$RELEASE"}}'
-                                ''', returnStatus: true)
+                                def eeResponse = sh(script: """
+                                                   curl -X POST -H "Authorization: Bearer $TOKEN" \\
+                                                        -H "Accept: application/vnd.github.v3+json" \\
+                                                        ${eeWorkflowApi} \\
+                                                        -d '{ "ref":"main", "inputs":{"dockerImageTag":"${RELEASE}", "architecture":"linux/amd64", "registry":"fit2cloud-registry"}}'
+                                                 """, returnStatus: true)
 
                                 if (eeResponse != 0) {
                                     error "企业版镜像构建工作流触发失败"
