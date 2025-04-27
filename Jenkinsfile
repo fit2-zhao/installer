@@ -111,7 +111,7 @@ pipeline {
                                                    curl -X POST -H "Authorization: Bearer $TOKEN" \\
                                                         -H "Accept: application/vnd.github.v3+json" \\
                                                         ${eeWorkflowApi} \\
-                                                        -d '{ "ref":"main", "inputs":{"dockerImageTag":"${RELEASE}", "architecture":"linux/amd64"}}'
+                                                        -d '{ "ref":"main", "inputs":{"dockerImageTag":"${RELEASE}", "architecture":"linux/amd64","EXECUTE_START_SCRIP":"false"}}'
                                                  """, returnStatus: true)
                                 if (eeResponse != 0) {
                                     error "企业版镜像构建工作流触发失败"
@@ -239,8 +239,8 @@ pipeline {
                         // 定义需要拉取的Docker镜像列表
                         def images = ['mysql:8.0.41',
                                     'redis:7.2.7-alpine',
-                                    "cordys-crm-ce:${RELEASE}",
-                                    "cordys-crm-ee:${RELEASE}"
+                                    "cordys-crm-ce-offline:${RELEASE}",
+                                    "cordys-crm-ee-offline:${RELEASE}"
                                     ]
                         // 拉取所有需要的Docker镜像
                         for (image in images) {
