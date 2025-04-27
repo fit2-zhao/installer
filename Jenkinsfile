@@ -45,7 +45,7 @@ pipeline {
         }
 
         // 阶段2：触发 GitHub Actions 构建镜像
-        stage('Trigger GitHub Actions') {
+        /* stage('Trigger GitHub Actions') {
             steps {
                 // 使用GitHub Token进行身份验证
                     withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN')]) {
@@ -150,15 +150,10 @@ pipeline {
                     }
                 }
             }
-        }
+        } */
         
         // 阶段3：修改安装配置文件
         stage('Modify install conf') {
-            when {
-                anyOf {
-                    tag pattern: "^v.*", comparator: "REGEXP"
-                }
-            }
             steps {
                 dir('installer') {
                     sh '''
@@ -178,11 +173,11 @@ pipeline {
         
         // 阶段4：打包在线安装包
         stage('Package Online-install') {
-            when {
-                anyOf {
-                    tag pattern: "^v.*?(?<!-arm64)\$", comparator: "REGEXP";
-                }
-            }
+//             when {
+//                 anyOf {
+//                     tag pattern: "^v.*?(?<!-arm64)\$", comparator: "REGEXP";
+//                 }
+//             }
             steps {
                 dir('installer') {
                     sh '''          
@@ -210,8 +205,8 @@ pipeline {
             steps {
                 // 使用凭据中的GitHub token和代理设置
                 withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN'), 
-                               string(credentialsId: 'HTTPS_PROXY', variable: 'HTTPS_PROXY')]) {
-                    withEnv(["TOKEN=$TOKEN", "HTTPS_PROXY=$HTTPS_PROXY"]) {
+                               string(credentialsId: 'CORDYS_HTTPS_PROXY', variable: 'CORDYS_HTTPS_PROXY')]) {
+                    withEnv(["TOKEN=$TOKEN", "CORDYS_HTTPS_PROXY=$CORDYS_HTTPS_PROXY"]) {
                         dir('installer') {
                             sh script: '''
                                 # 在GitHub上创建预发布版本
@@ -237,7 +232,7 @@ pipeline {
         
         // 阶段6：打包离线安装包
         stage('Package Offline-install') {
-            when { tag pattern: "^v.*", comparator: "REGEXP" }
+           // when { tag pattern: "^v.*", comparator: "REGEXP" }
             steps {
                 dir('installer') {
                     script {
