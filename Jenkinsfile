@@ -351,7 +351,7 @@ pipeline {
         }
         
         // 阶段7：上传离线安装包到OSS
-        stage('Upload') {
+        /* stage('Upload') {
             when {
                 anyOf {
                     tag pattern: "^v\\d+\\.\\d+\\.\\d+-alpha\$", comparator: "REGEXP";
@@ -391,5 +391,5 @@ pipeline {
                 qyWechatNotification failNotify: true, mentionedId: '', mentionedMobile: '', webhookUrl: "$WEBHOOK"
             }
         }
-    }
+    } */
 }
