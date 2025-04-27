@@ -108,12 +108,11 @@ pipeline {
                             if (ceBuildSuccess) {
                                 echo "开始触发企业版构建工作流..."
                                 def eeResponse = sh(script: """
-                                                curl -X POST -H "Authorization: Bearer $TOKEN" \\
-                                                     -H "Accept: application/vnd.github.v3+json" \\
-                                                     ${eeWorkflowApi} \\
-                                                     -d '{ "ref":"main", "inputs":{"dockerImageTag":"${RELEASE}", "architecture":"linux/amd64", "registry":"fit2cloud-registry"}}'
-                                              """, returnStatus: true)
-
+                                                   curl -X POST -H "Authorization: Bearer $TOKEN" \\
+                                                        -H "Accept: application/vnd.github.v3+json" \\
+                                                        ${eeWorkflowApi} \\
+                                                        -d '{ "ref":"main", "inputs":{"dockerImageTag":"${RELEASE}", "architecture":"linux/amd64", "registry":"fit2cloud-registry","EXECUTE_START_SCRIP":"false"}}'
+                                                 """, returnStatus: true)
                                 if (eeResponse != 0) {
                                     error "企业版镜像构建工作流触发失败"
                                 }
