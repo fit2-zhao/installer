@@ -52,12 +52,12 @@ pipeline {
                         withEnv(["TOKEN=$TOKEN"]) {
                         script {
                             // 社区版API端点
-                            def ceWorkflowApi = "https://api.github.com/repos/fit2-zhao/installer/actions/workflows/build-and-push.yml/dispatches"
-                            def ceRepoApi = "https://api.github.com/repos/fit2-zhao/installer/actions/runs"
+                            def ceWorkflowApi = "https://api.github.com/repos/fit2-zhao/actions/actions/workflows/build-and-push.yml/dispatches"
+                            def ceRepoApi = "https://api.github.com/repos/fit2-zhao/actions/actions/runs"
 
                             // 企业版API端点
-                            def eeWorkflowApi = "https://api.github.com/repos/fit2-zhao/installer/actions/workflows/build-and-push-xpack.yml/dispatches"
-                            def eeRepoApi = "https://api.github.com/repos/fit2-zhao/installer/actions/runs"
+                            def eeWorkflowApi = "https://api.github.com/repos/fit2-zhao/actions/actions/workflows/build-and-push-xpack.yml/dispatches"
+                            def eeRepoApi = "https://api.github.com/repos/fit2-zhao/actions/actions/runs"
 
                             // 触发社区版构建工作流
                             echo "开始触发社区版构建工作流..."
