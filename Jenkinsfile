@@ -80,10 +80,10 @@ pipeline {
                             timeout(time: 30, unit: 'MINUTES') {
                                 waitUntil {
                                     sleep(time: 10, unit: 'SECONDS')
-                                    def statusJson = sh(script: '''
+                                    def statusJson = sh(script: """
                                         curl -s -H "Authorization: Bearer $TOKEN" \
-                                        "''' + ceRepoApi + '''?event=workflow_dispatch&per_page=1"
-                                    ''', returnStdout: true).trim()
+                                        """" + ceRepoApi + """?event=workflow_dispatch&per_page=1"
+                                    """, returnStdout: true).trim()
 
                                     def status = sh(script: "echo '$statusJson' | grep -oP '\"status\": \"\\K[^\"]+' || echo 'unknown'", returnStdout: true).trim()
                                     def conclusion = sh(script: "echo '$statusJson' | grep -oP '\"conclusion\": \"\\K[^\"]+' || echo 'unknown'", returnStdout: true).trim()
@@ -123,10 +123,10 @@ pipeline {
                                 timeout(time: 30, unit: 'MINUTES') {
                                     waitUntil {
                                         sleep(time: 10, unit: 'SECONDS')
-                                        def statusJson = sh(script: '''
+                                        def statusJson = sh(script: """
                                             curl -s -H "Authorization: Bearer $TOKEN" \
-                                            "''' + eeRepoApi + '''?event=workflow_dispatch&per_page=1"
-                                        ''', returnStdout: true).trim()
+                                            """" + eeRepoApi + """?event=workflow_dispatch&per_page=1"
+                                        """, returnStdout: true).trim()
 
                                         def status = sh(script: "echo '$statusJson' | grep -oP '\"status\": \"\\K[^\"]+' || echo 'unknown'", returnStdout: true).trim()
                                         def conclusion = sh(script: "echo '$statusJson' | grep -oP '\"conclusion\": \"\\K[^\"]+' || echo 'unknown'", returnStdout: true).trim()
@@ -208,7 +208,7 @@ pipeline {
                                string(credentialsId: 'CORDYS_HTTPS_PROXY', variable: 'CORDYS_HTTPS_PROXY')]) {
                     withEnv(["TOKEN=$TOKEN", "CORDYS_HTTPS_PROXY=$CORDYS_HTTPS_PROXY"]) {
                         dir('installer') {
-                            sh script: '''
+                            sh script: """
                                 # 在GitHub上创建预发布版本
                                 release=$(curl -XPOST -H "Authorization:token $TOKEN" --data "{\\"tag_name\\": \\"${RELEASE}\\", \\"target_commitish\\": \\"${BRANCH_NAME}\\", \\"name\\": \\"${RELEASE}\\", \\"body\\": \\"\\", \\"draft\\": false, \\"prerelease\\": true}" https://api.github.com/repos/cordys/cordys/releases)
                                 
@@ -223,7 +223,7 @@ pipeline {
                                 
                                 # 为standalone仓库也创建release
                                 curl -XPOST -H "Authorization:token $TOKEN" --data "{\\"tag_name\\": \\"${RELEASE}\\", \\"target_commitish\\": \\"${BRANCH_NAME}\\", \\"name\\": \\"${RELEASE}\\", \\"body\\": \\"\\", \\"draft\\": false, \\"prerelease\\": true}" https://api.github.com/repos/cordys/cordys-standalone/releases
-                            '''
+                            """
                         }
                     }
                 }
