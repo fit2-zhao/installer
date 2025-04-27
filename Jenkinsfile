@@ -65,7 +65,7 @@ pipeline {
                                 curl -X POST -H "Authorization: Bearer $TOKEN" \
                                 -H "Accept: application/vnd.github.v3+json" \
                                 ''' + ceWorkflowApi + ''' \
-                                -d '{"ref":"main", "inputs":{"dockerImageTag":"${RELEASE}", "architecture":"linux/amd64", "registry":"fit2cloud-registry","EXECUTE_START_SCRIP":"false"}}'
+                                -d '{"ref":"main", "inputs":{"dockerImageTag":${RELEASE}, "architecture":"linux/amd64", "registry":"fit2cloud-registry","EXECUTE_START_SCRIP":"false"}}'
                             ''', returnStatus: true)
 
                             if (ceResponse != 0) {
@@ -110,7 +110,7 @@ pipeline {
                                     curl -X POST -H "Authorization: Bearer $TOKEN" \
                                     -H "Accept: application/vnd.github.v3+json" \
                                     ''' + eeWorkflowApi + ''' \
-                                    -d '{"ref":"main", "inputs":{"dockerImageTag":"${RELEASE}"}}'
+                                    -d '{"ref":"main", "inputs":{"dockerImageTag":${RELEASE}}}'
                                 ''', returnStatus: true)
 
                                 if (eeResponse != 0) {
