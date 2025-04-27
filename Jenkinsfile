@@ -45,7 +45,7 @@ pipeline {
         }
 
         // 阶段2：触发 GitHub Actions 构建镜像
-        stage('Trigger GitHub Actions') {
+       /*  stage('Trigger GitHub Actions') {
             steps {
                 // 使用GitHub Token进行身份验证
                     withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN')]) {
@@ -150,7 +150,7 @@ pipeline {
                     }
                 }
             }
-        }
+        } */
         
         // 阶段3：修改安装配置文件
         stage('Modify install conf') {
