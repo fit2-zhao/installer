@@ -45,7 +45,7 @@ pipeline {
         }
 
         // 阶段2：触发 GitHub Actions 构建镜像
-        /* stage('Trigger GitHub Actions') {
+        stage('Trigger GitHub Actions') {
             steps {
                 // 使用GitHub Token进行身份验证
                     withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN')]) {
@@ -65,7 +65,7 @@ pipeline {
                                 curl -X POST -H "Authorization: Bearer $TOKEN" \
                                 -H "Accept: application/vnd.github.v3+json" \
                                 ''' + ceWorkflowApi + ''' \
-                                -d '{"ref":"main", "inputs":{"dockerImageTag":"'"${RELEASE}"'", "architecture":"linux/amd64", "registry":"fit2cloud-registry"}}'
+                                -d '{"ref":"main", "inputs":{"dockerImageTag":"'"${RELEASE}"'", "architecture":"linux/amd64", "registry":"fit2cloud-registry","EXECUTE_START_SCRIP":"false"}}'
                             ''', returnStatus: true)
 
                             if (ceResponse != 0) {
@@ -87,7 +87,7 @@ pipeline {
                                     def status = sh(script: "echo '$statusJson' | grep -oP '\"status\": \"\\K[^\"]+' || echo 'unknown'", returnStdout: true).trim()
                                     def conclusion = sh(script: "echo '$statusJson' | grep -oP '\"conclusion\": \"\\K[^\"]+' || echo 'unknown'", returnStdout: true).trim()
 
-                                    echo "社区版工作流当前状态: ${status}, 结论: ${conclusion}"
+                                    echo "社区版工作流当前状态: ${status}"
 
                                     if (status == "completed") {
                                         if (conclusion == "success") {
@@ -95,7 +95,7 @@ pipeline {
                                             ceBuildSuccess = true
                                             return true
                                         } else {
-                                            error "社区版构建工作流执行失败，结论: ${conclusion}"
+                                            error "社区版构建工作流执行失败"
                                         }
                                     }
 
@@ -131,14 +131,14 @@ pipeline {
                                         def status = sh(script: "echo '$statusJson' | grep -oP '\"status\": \"\\K[^\"]+' || echo 'unknown'", returnStdout: true).trim()
                                         def conclusion = sh(script: "echo '$statusJson' | grep -oP '\"conclusion\": \"\\K[^\"]+' || echo 'unknown'", returnStdout: true).trim()
 
-                                        echo "企业版工作流当前状态: ${status}, 结论: ${conclusion}"
+                                        echo "企业版工作流当前状态: ${status}"
 
                                         if (status == "completed") {
                                             if (conclusion == "success") {
                                                 echo "企业版构建工作流执行成功!"
                                                 return true
                                             } else {
-                                                error "企业版构建工作流执行失败，结论: ${conclusion}"
+                                                error "企业版构建工作流执行失败"
                                             }
                                         }
 
@@ -150,7 +150,7 @@ pipeline {
                     }
                 }
             }
-        } */
+        }
         
         // 阶段3：修改安装配置文件
         stage('Modify install conf') {
