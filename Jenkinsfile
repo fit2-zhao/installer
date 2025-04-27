@@ -250,7 +250,7 @@ pipeline {
                             }
                         }
                     }
-                    sh '''
+                    sh """
                         # 保存社区版所需镜像
                         rm -rf images && mkdir images && cd images
                         docker save ${IMAGE_PREFIX}/cordys-crm-ce-offline:${RELEASE} \\
@@ -264,7 +264,7 @@ pipeline {
                         ${IMAGE_PREFIX}/mysql:8.0.41 \\
                         ${IMAGE_PREFIX}/redis:7.2.7-alpine > cordys-crm.tar
                         cd ..
-                    '''
+                    """
                     script {
                         // 处理架构信息（x86_64或arm64）
                         RELEASE = ""
@@ -282,7 +282,7 @@ pipeline {
                         echo "RELEASE=${RELEASE}"
                         echo "ARCH=${ARCH}"
                     }
-                    sh '''
+                    sh """
                         # 准备docker相关文件
                         rm -rf docker/*
                         rm -rf docker
@@ -335,7 +335,7 @@ pipeline {
                         # 生成企业版MD5校验文件
                         md5sum -b cordys-crm-ee-offline-installer-${RELEASE}.tar.gz | awk '{print $1}' > cordys-crm-ee-offline-installer-${RELEASE}.tar.gz.md5
                         rm -rf images
-                    '''
+                    """
                 }
             }
         }
