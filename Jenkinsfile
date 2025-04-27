@@ -237,7 +237,7 @@ pipeline {
                 dir('installer') {
                     script {
                         // 定义需要拉取的Docker镜像列表
-                        def images = ['mysql:8.0.38',
+                        def images = ['mysql:8.0.41',
                                     'redis:7.2.7-alpine',
                                     "cordys-crm-ce:${RELEASE}",
                                     "cordys-crm-ee:${RELEASE}"
@@ -254,14 +254,14 @@ pipeline {
                         # 保存社区版所需镜像
                         rm -rf images && mkdir images && cd images
                         docker save ${IMAGE_PREFIX}/cordys-crm-ce:${RELEASE} \\
-                        ${IMAGE_PREFIX}/mysql:8.0.38 \\
+                        ${IMAGE_PREFIX}/mysql:8.0.41 \\
                         ${IMAGE_PREFIX}/redis:7.2.7-alpine > cordys-crm.tar
                         cd ..
 
                         # 保存企业版所需镜像
                         rm -rf enterprise && mkdir enterprise && cd enterprise
                         docker save ${IMAGE_PREFIX}/cordys-crm-ee:${RELEASE} \\
-                        ${IMAGE_PREFIX}/mysql:8.0.38 \\
+                        ${IMAGE_PREFIX}/mysql:8.0.41 \\
                         ${IMAGE_PREFIX}/redis:7.2.7-alpine > cordys-crm.tar
                         cd ..
                     '''
