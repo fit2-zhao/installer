@@ -46,11 +46,6 @@ pipeline {
 
         // 阶段2：触发 GitHub Actions 构建镜像
         stage('Trigger GitHub Actions') {
-            when {
-                anyOf {
-                    tag pattern: "^v.*", comparator: "REGEXP"
-                }
-            }
             steps {
                 // 使用GitHub Token进行身份验证
                     withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN')]) {
