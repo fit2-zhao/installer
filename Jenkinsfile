@@ -45,7 +45,7 @@ pipeline {
         }
 
         // 阶段2：触发 GitHub Actions 构建镜像
-        stage('Trigger GitHub Actions') {
+       /*  stage('Trigger GitHub Actions') {
             steps {
                 // 使用GitHub Token进行身份验证
                     withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN')]) {
@@ -191,7 +191,7 @@ pipeline {
                 }
             }
         }
-
+ */
         // 阶段5：发布到GitHub
         stage('Release') {
             steps {
@@ -199,7 +199,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN')]) {
                     withEnv(["TOKEN=$TOKEN"]) {
                         dir('installer') {
-                        sh '''#!/bin/sh
+                        sh '''
                         # 在GitHub上创建预发布版本
                         release=$(curl -XPOST -H "Authorization:token $TOKEN" \\
                         --data \'{
@@ -230,7 +230,7 @@ pipeline {
         }
 
         // 阶段6：打包离线安装包
-        stage('Package Offline-install') {
+        /* stage('Package Offline-install') {
             steps {
                 dir('installer') {
                     script {
@@ -282,7 +282,7 @@ pipeline {
                     }
                     sh script: """
                         # 准备docker相关文件
-                        rm -rf docker/*
+                        rm -rf docker *//*
                         rm -rf docker
 
                         # 下载对应架构的docker和docker-compose
@@ -318,7 +318,7 @@ pipeline {
                         echo 'CORDYS_ENTERPRISE_ENABLE=true' >> install.conf
 
                         # 清理临时文件
-                        rm -rf cordys/*.yml-e
+                        rm -rf cordys *//*.yml-e
 
                         # 打包企业版离线安装包
                         touch cordys-crm-ee-offline-installer-${RELEASE}.tar.gz
@@ -336,7 +336,7 @@ pipeline {
                     """
                 }
             }
-        }
+        } */
         
         // 阶段7：上传离线安装包到OSS
 //         stage('Upload') {
