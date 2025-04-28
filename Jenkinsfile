@@ -80,10 +80,10 @@ pipeline {
                             timeout(time: 30, unit: 'MINUTES') {
                                 waitUntil {
                                     sleep(time: 10, unit: 'SECONDS')
-                                    def statusJson = sh(script: """
+                                    def statusJson = sh(script: '''
                                         curl -s -H "Authorization: Bearer $TOKEN" \
-                                        """" + ceRepoApi + """?event=workflow_dispatch&per_page=1"
-                                    """, returnStdout: true).trim()
+                                        "''' + ceRepoApi + '''?event=workflow_dispatch&per_page=1"
+                                    ''', returnStdout: true).trim()
 
                                     def status = sh(script: "echo '$statusJson' | grep -oP '\"status\": \"\\K[^\"]+' || echo 'unknown'", returnStdout: true).trim()
                                     def conclusion = sh(script: "echo '$statusJson' | grep -oP '\"conclusion\": \"\\K[^\"]+' || echo 'unknown'", returnStdout: true).trim()
@@ -123,10 +123,10 @@ pipeline {
                                 timeout(time: 30, unit: 'MINUTES') {
                                     waitUntil {
                                         sleep(time: 10, unit: 'SECONDS')
-                                        def statusJson = sh(script: """
+                                        def statusJson = sh(script: '''
                                             curl -s -H "Authorization: Bearer $TOKEN" \
-                                            """" + eeRepoApi + """?event=workflow_dispatch&per_page=1"
-                                        """, returnStdout: true).trim()
+                                            "''' + eeRepoApi + '''?event=workflow_dispatch&per_page=1"
+                                        ''', returnStdout: true).trim()
 
                                         def status = sh(script: "echo '$statusJson' | grep -oP '\"status\": \"\\K[^\"]+' || echo 'unknown'", returnStdout: true).trim()
                                         def conclusion = sh(script: "echo '$statusJson' | grep -oP '\"conclusion\": \"\\K[^\"]+' || echo 'unknown'", returnStdout: true).trim()
@@ -151,26 +151,26 @@ pipeline {
                 }
             }
         } */
-        
+
         // 阶段3：修改安装配置文件
         stage('Modify install conf') {
             steps {
                 dir('installer') {
-                    sh """
+                    sh script: '''
                         # 清理旧的安装包
                         rm -rf cordys-*.tar.gz
-                        
+
                         # 修改安装配置文件中的镜像标签和前缀
                         sed -i -e "s#CORDYS_IMAGE_TAG=.*#CORDYS_IMAGE_TAG=${RELEASE}#g" install.conf
                         sed -i -e "s#CORDYS_IMAGE_PREFIX=.*#CORDYS_IMAGE_PREFIX=${IMAGE_PREFIX}#g" install.conf
-                        
+
                         # 将版本号写入version文件
-                        echo ${RELEASE} > ./cordys/version                   
-                    """
+                        echo ${RELEASE} > ./cordys/version
+                    '''
                 }
             }
         }
-        
+
         // 阶段4：打包在线安装包
         stage('Package Online-install') {
 //             when {
@@ -180,7 +180,7 @@ pipeline {
 //             }
             steps {
                 dir('installer') {
-                    sh """
+                    sh script: '''
                         # 打包社区版在线安装包
                         touch cordys-crm-ce-online-installer-${RELEASE}.tar.gz
                         # 使用tar命令打包，排除不需要的文件
@@ -194,42 +194,42 @@ pipeline {
                             --exclude enterprise \\
                             --exclude docker \\
                             -czvf cordys-crm-ce-online-installer-${RELEASE}.tar.gz .
-                    """
+                    '''
                 }
             }
         }
-        
+
         // 阶段5：发布到GitHub
         stage('Release') {
             when { tag pattern: "^v.*?(?<!-arm64)\$", comparator: "REGEXP" }
             steps {
                 // 使用凭据中的GitHub token和代理设置
-                withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN'), 
+                withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN'),
                                string(credentialsId: 'CORDYS_HTTPS_PROXY', variable: 'CORDYS_HTTPS_PROXY')]) {
                     withEnv(["TOKEN=$TOKEN", "CORDYS_HTTPS_PROXY=$CORDYS_HTTPS_PROXY"]) {
                         dir('installer') {
-                            sh script: """
+                            sh script: '''
                                 # 在GitHub上创建预发布版本
                                 release=$(curl -XPOST -H "Authorization:token $TOKEN" --data "{\\"tag_name\\": \\"${RELEASE}\\", \\"target_commitish\\": \\"${BRANCH_NAME}\\", \\"name\\": \\"${RELEASE}\\", \\"body\\": \\"\\", \\"draft\\": false, \\"prerelease\\": true}" https://api.github.com/repos/cordys/cordys/releases)
-                                
+
                                 # 获取创建的release ID
                                 id=$(echo "$release" | sed -n -e \'s/"id":\\ \\([0-9]\\+\\),/\\1/p\' | head -n 1 | sed \'s/[[:blank:]]//g\')
-                                
+
                                 # 上传在线安装包到GitHub Release
                                 curl -XPOST -H "Authorization:token $TOKEN" -H "Content-Type:application/octet-stream" --data-binary @cordys-crm-ce-online-installer-${RELEASE}.tar.gz https://uploads.github.com/repos/cordys/cordys/releases/${id}/assets?name=cordys-crm-ce-online-installer-${RELEASE}.tar.gz
 
                                 # 上传到OSS存储
                                 ossutil -c /opt/jenkins-home/cordys/config cp -f cordys-crm-ce-online-installer-${RELEASE}.tar.gz oss://resource-fit2cloud-com/cordys/cordys/releases/download/${RELEASE}/ --update
-                                
+
                                 # 为standalone仓库也创建release
                                 curl -XPOST -H "Authorization:token $TOKEN" --data "{\\"tag_name\\": \\"${RELEASE}\\", \\"target_commitish\\": \\"${BRANCH_NAME}\\", \\"name\\": \\"${RELEASE}\\", \\"body\\": \\"\\", \\"draft\\": false, \\"prerelease\\": true}" https://api.github.com/repos/cordys/cordys-standalone/releases
-                            """
+                            '''
                         }
                     }
                 }
             }
-        }        
-        
+        }
+
         // 阶段6：打包离线安装包
         stage('Package Offline-install') {
            // when { tag pattern: "^v.*", comparator: "REGEXP" }
@@ -250,7 +250,7 @@ pipeline {
                             }
                         }
                     }
-                    sh """
+                    sh '''
                         # 保存社区版所需镜像
                         rm -rf images && mkdir images && cd images
                         docker save ${IMAGE_PREFIX}/cordys-crm-ce-offline:${RELEASE} \\
@@ -264,7 +264,7 @@ pipeline {
                         ${IMAGE_PREFIX}/mysql:8.0.41 \\
                         ${IMAGE_PREFIX}/redis:7.2.7-alpine > cordys-crm.tar
                         cd ..
-                    """
+                    '''
                     script {
                         // 处理架构信息（x86_64或arm64）
                         RELEASE = ""
@@ -282,7 +282,7 @@ pipeline {
                         echo "RELEASE=${RELEASE}"
                         echo "ARCH=${ARCH}"
                     }
-                    sh """
+                    sh '''
                         # 准备docker相关文件
                         rm -rf docker/*
                         rm -rf docker
@@ -309,7 +309,7 @@ pipeline {
                         # 生成MD5校验文件
                         md5sum -b cordys-crm-ce-offline-installer-${RELEASE}.tar.gz | awk '{print $1}' > cordys-crm-ce-offline-installer-${RELEASE}.tar.gz.md5
                         rm -rf images
-                        
+
                         # 准备企业版镜像
                         mv enterprise images
                         # 修改配置文件中的-ce为-ee
@@ -318,10 +318,10 @@ pipeline {
                         # 添加企业版特有配置
                         echo '# 企业版配置' >> install.conf
                         echo 'CORDYS_ENTERPRISE_ENABLE=true' >> install.conf
-                        
+
                         # 清理临时文件
                         rm -rf cordys/*.yml-e
-                        
+
                         # 打包企业版离线安装包
                         touch cordys-crm-ee-offline-installer-${RELEASE}.tar.gz
                         tar --transform "s/^\\./cordys-crm-ee-offline-installer-${RELEASE}/" \\
@@ -335,7 +335,7 @@ pipeline {
                         # 生成企业版MD5校验文件
                         md5sum -b cordys-crm-ee-offline-installer-${RELEASE}.tar.gz | awk '{print $1}' > cordys-crm-ee-offline-installer-${RELEASE}.tar.gz.md5
                         rm -rf images
-                    """
+                    '''
                 }
             }
         }
