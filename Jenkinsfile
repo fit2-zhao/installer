@@ -198,7 +198,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN')]) {
                     withEnv(["TOKEN=$TOKEN"]) {
                         dir('installer') {
-                            sh script: '''
+                            sh script: """
                                 release_data=$(jq -n \
                                   --arg tag "$RELEASE" \
                                   --arg branch "$BRANCH_NAME" \
@@ -227,7 +227,8 @@ pipeline {
                                   -H "Content-Type: application/octet-stream" \
                                   --data-binary @"cordys-crm-ce-online-installer-${RELEASE}.tar.gz" \
                                   "https://uploads.github.com/repos/cordys-dev/cordys-crm/releases/${release_id}/assets?name=cordys-crm-ce-online-installer-${RELEASE}.tar.gz"
-                            '''
+
+                            """
                         }
                     }
                 }
