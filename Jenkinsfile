@@ -296,7 +296,7 @@ pipeline {
 
                         # 打包社区版离线安装包
                         touch cordys-crm-ce-offline-installer-${RELEASE}.tar.gz
-                        tar --transform 's/^\./cordys-crm-ce-offline-installer-${RELEASE}/' \\
+                        tar --transform 's/^\\./cordys-crm-ce-offline-installer-${RELEASE}/' \\
                             --exclude cordys-crm-ce-online-installer-${RELEASE}.tar.gz \\
                             --exclude cordys-crm-ce-offline-installer-${RELEASE}.tar.gz \\
                             --exclude cordys-crm-ce-release-${RELEASE}.tar.gz \\
