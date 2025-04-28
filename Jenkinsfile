@@ -199,18 +199,25 @@ pipeline {
                     withEnv(["TOKEN=$TOKEN"]) {
                         dir('installer') {
                             sh script: '''
-                                release=$(curl -X POST \
-                                  -H "Authorization: token $TOKEN" \
-                                  -H "Content-Type: application/json" \
-                                  --data '{
-                                    "tag_name": "v1.0.0",
-                                    "target_commitish": "'"$BRANCH_NAME"'",
-                                    "name": "'"$RELEASE"'",
-                                    "body": "",
-                                    "draft": false,
-                                    "prerelease": true
-                                  }' \
-                                  https://api.github.com/repos/cordys-dev/cordys-crm/releases)
+                                release=$(jq -n \
+                                  --arg tag_name "$RELEASE" \
+                                  --arg target_commitish "$BRANCH_NAME" \
+                                  --arg name "$RELEASE" \
+                                  --arg body "" \
+                                  --argjson draft false \
+                                  --argjson prerelease true \
+                                  '{
+                                    tag_name: $tag_name,
+                                    target_commitish: $target_commitish,
+                                    name: $name,
+                                    body: $body,
+                                    draft: $draft,
+                                    prerelease: $prerelease
+                                  }' | curl -s -X POST \
+                                    -H "Authorization: token $TOKEN" \
+                                    -H "Content-Type: application/json" \
+                                    -d @- \
+                                    https://api.github.com/repos/cordys-dev/cordys-crm/releases)
                                 id=$(echo "$release" | sed -n -e 's/"id":\\([0-9]\\+\\),/\\1/p' | head -n 1 | sed 's/[[:blank:]]//g')
                                 curl -XPOST -H "Authorization:token $TOKEN" -H "Content-Type:application/octet-stream" --data-binary @cordys-crm-ce-online-installer-$RELEASE.tar.gz "https://uploads.github.com/repos/cordys-dev/cordys-crm/releases/$id/assets?name=cordys-crm-ce-online-installer-$RELEASE.tar.gz"
                                 # ossutil -c /opt/jenkins-home/cordys/config cp -f cordys-crm-ce-online-installer-$RELEASE.tar.gz oss://resource-fit2cloud-com/cordys/cordys-crm/releases/download/$RELEASE/ --update
