@@ -305,9 +305,7 @@ pipeline {
                             -czvf cordys-crm-ce-offline-installer-${RELEASE}.tar.gz .
 
                         # 生成MD5校验文件
-                        #md5sum -b cordys-crm-ce-offline-installer-${RELEASE}.tar.gz | awk '{print \$1}' > cordys-crm-ce-offline-installer-${RELEASE}.tar.gz.md5
-                         md5sum -b cordys-crm-ce-offline-installer-${RELEASE}.tar.gz > cordys-crm-ce-offline-installer-${RELEASE}.tar.gz.md5
-
+                        md5sum -b cordys-crm-ce-offline-installer-${RELEASE}.tar.gz | awk '{print \$1}' > cordys-crm-ce-offline-installer-${RELEASE}.tar.gz.md5
                         rm -rf images
 
                         # 准备企业版镜像
@@ -333,9 +331,7 @@ pipeline {
                             -czvf cordys-crm-ee-offline-installer-${RELEASE}.tar.gz .
 
                         # 生成企业版MD5校验文件
-                        #md5sum -b cordys-crm-ee-offline-installer-${RELEASE}.tar.gz | awk '{print \$1}' > cordys-crm-ee-offline-installer-${RELEASE}.tar.gz.md5
-                        md5sum -b cordys-crm-ee-offline-installer-${RELEASE}.tar.gz > cordys-crm-ee-offline-installer-${RELEASE}.tar.gz.md5
-
+                        md5sum -b cordys-crm-ee-offline-installer-${RELEASE}.tar.gz | awk '{print \$1}' > cordys-crm-ee-offline-installer-${RELEASE}.tar.gz.md5
                         rm -rf images
                     """
                 }
