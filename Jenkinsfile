@@ -195,35 +195,17 @@ pipeline {
         // 阶段5：发布到GitHub
         stage('Release') {
             steps {
-                // 使用凭据中的GitHub token和代理设置
-                withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN')]) {
-                    withEnv(["TOKEN=$TOKEN"]) {
+                withCredentials([string(credentialsId: 'gitrelease', variable: 'TOKEN'), string(credentialsId: 'HTTPS_PROXY', variable: 'HTTPS_PROXY')]) {
+                    withEnv(["TOKEN=$TOKEN", "HTTPS_PROXY=$HTTPS_PROXY"]) {
                         dir('installer') {
-                        sh '''
-                        # 在GitHub上创建预发布版本
-                        release=$(curl -XPOST -H "Authorization:token $TOKEN" \\
-                        --data \'{
-                          "tag_name": "'"${RELEASE}"'",
-                          "target_commitish": "'"${BRANCH_NAME}"'",
-                          "name": "'"${RELEASE}"'",
-                          "body": "",
-                          "draft": false,
-                          "prerelease": true
-                        }\' \\
-                        https://api.github.com/repos/cordys-dev/cordys-crm/releases)
+                            sh script: '''
+                                release=$(curl -XPOST -H "Authorization:token $TOKEN" --data "{\\"tag_name\\": \\"${RELEASE}\\", \\"target_commitish\\": \\"${BRANCH_NAME}\\", \\"name\\": \\"${RELEASE}\\", \\"body\\": \\"\\", \\"draft\\": false, \\"prerelease\\": true}" https://api.github.com/repos/cordys-dev/cordys-crm/releases)
+                                id=$(echo "$release" | sed -n -e \'s/"id":\\ \\([0-9]\\+\\),/\\1/p\' | head -n 1 | sed \'s/[[:blank:]]//g\')
+                                curl -XPOST -H "Authorization:token $TOKEN" -H "Content-Type:application/octet-stream" --data-binary @metersphere-ce-online-installer-${RELEASE}.tar.gz https://uploads.github.com/repos/cordys-dev/cordys-crm/releases/${id}/assets?name=cordys-crm-ce-online-installer-${RELEASE}.tar.gz
 
-                        # 获取创建的release ID
-                        id=$(echo "$release" | sed -n -e \'s/"id":\\s*\\([0-9]\\+\\),/\\1/p\' | head -n 1)
-
-                        # 上传在线安装包到GitHub Release
-                        #curl -XPOST -H "Authorization:token $TOKEN" -H "Content-Type:application/octet-stream" \\
-                        #--data-binary @cordys-crm-ce-online-installer-${RELEASE}.tar.gz \\
-                        #"https://uploads.github.com/repos/cordys-dev/cordys-crm/releases/${id}/assets?name=cordys-crm-ce-online-installer-${RELEASE}.tar.gz"
-
-                        # 上传到OSS存储
-                        #ossutil -c /opt/jenkins-home/cordys/config cp -f cordys-crm-ce-online-installer-${RELEASE}.tar.gz \\
-                        #oss://resource-fit2cloud-com/cordys/cordys/releases/download/${RELEASE}/ --update
-                        '''                        }
+                                ossutil -c /opt/jenkins-home/metersphere/config cp -f metersphere-ce-online-installer-${RELEASE}.tar.gz oss://resource-fit2cloud-com/cordys/cordys-crm/releases/download/${RELEASE}/ --update
+                            '''
+                        }
                     }
                 }
             }
