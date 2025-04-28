@@ -201,7 +201,7 @@ pipeline {
                         dir('installer') {
                             sh script: """
                                 # 在GitHub上创建预发布版本
-                                release=$(curl -XPOST -H "Authorization:token $TOKEN" --data "{\\"tag_name\\": \\"${RELEASE}\\", \\"target_commitish\\": \\"${BRANCH_NAME}\\", \\"name\\": \\"${RELEASE}\\", \\"body\\": \\"\\", \\"draft\\": false, \\"prerelease\\": true}" https://api.github.com/repos/cordys-dev/cordys-crm/releases)
+                                release=$(curl -XPOST -H "Authorization:token \$TOKEN" --data "{\"tag_name\": \"${RELEASE}\", \"target_commitish\": \"${BRANCH_NAME}\", \"name\": \"${RELEASE}\", \"body\": \"\", \"draft\": false, \"prerelease\": true}" https://api.github.com/repos/cordys-dev/cordys-crm/releases)
 
                                 # 获取创建的release ID
                                 id=$(echo "$release" | sed -n -e \'s/"id":\\ \\([0-9]\\+\\),/\\1/p\' | head -n 1 | sed \'s/[[:blank:]]//g\')
