@@ -228,6 +228,12 @@ pipeline {
                                     --data-binary @cordys-crm-ce-online-installer-${RELEASE}.tar.gz \
                                     "${uploadUrl}?name=cordys-crm-ce-online-installer-${RELEASE}.tar.gz"
                             """
+
+                            // 上传到 uploadToOss
+                            /* sh """
+                                ossutil -c /opt/jenkins-home/cordys/config cp -f cordys-ce-online-installer-${RELEASE}.tar.gz oss://resource-fit2cloud-com/cordys/cordys/releases/download/${RELEASE}/ --update
+
+                            """ */
                         }
                     }
                 }
@@ -343,45 +349,33 @@ pipeline {
         }
 
         // 阶段7：上传离线安装包到OSS
-//         stage('Upload') {
-//             when {
-//                 anyOf {
-//                     tag pattern: "^v\\d+\\.\\d+\\.\\d+-alpha\$", comparator: "REGEXP";
-//                     tag pattern: "^v\\d+\\.\\d+\\.\\d+-alpha-arm64\$", comparator: "REGEXP";
-//                     tag pattern: "^v\\d+\\.\\d+\\.\\d+-beta\$", comparator: "REGEXP";
-//                     tag pattern: "^v\\d+\\.\\d+\\.\\d+-beta-arm64\$", comparator: "REGEXP";
-//
-//                     tag pattern: "^v\\d+\\.\\d+\\.\\d+\$", comparator: "REGEXP";
-//                     tag pattern: "^v\\d+\\.\\d+\\.\\d+-arm64\$", comparator: "REGEXP";
-//                     tag pattern: "^v\\d+\\.\\d+\\.\\d+-lts\$", comparator: "REGEXP";
-//                     tag pattern: "^v\\d+\\.\\d+\\.\\d+-lts-arm64\$", comparator: "REGEXP"
-//                 }
-//             }
-//             steps {
-//                 dir('installer') {
-//                     echo "UPLOADING"
-//                     // 使用OSS凭据上传文件
-//                     withCredentials([usernamePassword(credentialsId: 'OSSKEY', passwordVariable: 'SK', usernameVariable: 'AK')]) {
-//                         // 上传社区版离线安装包和MD5文件
-//                         sh("java -jar /opt/uploadToOss.jar $AK $SK fit2cloud2-offline-installer cordys/release/cordys-crm-ce-offline-installer-${RELEASE}.tar.gz ./cordys-crm-ce-offline-installer-${RELEASE}.tar.gz")
-//                         sh("java -jar /opt/uploadToOss.jar $AK $SK fit2cloud2-offline-installer cordys/release/cordys-crm-ce-offline-installer-${RELEASE}.tar.gz.md5 ./cordys-crm-ce-offline-installer-${RELEASE}.tar.gz.md5")
-//
-//                         // 上传企业版离线安装包和MD5文件
-//                         sh("java -jar /opt/uploadToOss.jar $AK $SK fit2cloud2-offline-installer cordys/release/cordys-crm-ee-offline-installer-${RELEASE}.tar.gz ./cordys-crm-ee-offline-installer-${RELEASE}.tar.gz")
-//                         sh("java -jar /opt/uploadToOss.jar $AK $SK fit2cloud2-offline-installer cordys/release/cordys-crm-ee-offline-installer-${RELEASE}.tar.gz.md5 ./cordys-crm-ee-offline-installer-${RELEASE}.tar.gz.md5")
-//                     }
-//                 }
-//             }
-//         }
+        stage('Upload') {
+            when { tag pattern: "^v.*", comparator: "REGEXP" }
+            steps {
+                dir('installer') {
+                    echo "UPLOADING"
+                    // 使用OSS凭据上传文件
+                    withCredentials([usernamePassword(credentialsId: 'OSSKEY', passwordVariable: 'SK', usernameVariable: 'AK')]) {
+                        // 上传社区版离线安装包和MD5文件
+                        sh("java -jar /opt/uploadToOss.jar $AK $SK fit2cloud2-offline-installer cordys/release/cordys-crm-ce-offline-installer-${RELEASE}.tar.gz ./cordys-crm-ce-offline-installer-${RELEASE}.tar.gz")
+                        sh("java -jar /opt/uploadToOss.jar $AK $SK fit2cloud2-offline-installer cordys/release/cordys-crm-ce-offline-installer-${RELEASE}.tar.gz.md5 ./cordys-crm-ce-offline-installer-${RELEASE}.tar.gz.md5")
+
+                        // 上传企业版离线安装包和MD5文件
+                        sh("java -jar /opt/uploadToOss.jar $AK $SK fit2cloud2-offline-installer cordys/release/cordys-crm-ee-offline-installer-${RELEASE}.tar.gz ./cordys-crm-ee-offline-installer-${RELEASE}.tar.gz")
+                        sh("java -jar /opt/uploadToOss.jar $AK $SK fit2cloud2-offline-installer cordys/release/cordys-crm-ee-offline-installer-${RELEASE}.tar.gz.md5 ./cordys-crm-ee-offline-installer-${RELEASE}.tar.gz.md5")
+                    }
+                }
+            }
+        }
     }
 
     // 后置处理：发送通知
-//     post('Notification') {
-//         always {
-//             // 使用企业微信webhook发送构建结果通知
-//             withCredentials([string(credentialsId: 'wechat-bot-webhook', variable: 'WEBHOOK')]) {
-//                 qyWechatNotification failNotify: true, mentionedId: '', mentionedMobile: '', webhookUrl: "$WEBHOOK"
-//             }
-//         }
-//     }
+    post('Notification') {
+        always {
+            // 使用企业微信webhook发送构建结果通知
+            withCredentials([string(credentialsId: 'wechat-bot-webhook', variable: 'WEBHOOK')]) {
+                qyWechatNotification failNotify: true, mentionedId: '', mentionedMobile: '', webhookUrl: "$WEBHOOK"
+            }
+        }
+    }
 }
