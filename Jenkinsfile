@@ -207,10 +207,10 @@ pipeline {
                                 id=$(echo "$release" | sed -n -e \'s/"id":\\ \\([0-9]\\+\\),/\\1/p\' | head -n 1 | sed \'s/[[:blank:]]//g\')
 
                                 # 上传在线安装包到GitHub Release
-                                #curl -XPOST -H "Authorization:token $TOKEN" -H "Content-Type:application/octet-stream" --data-binary @cordys-crm-ce-online-installer-${RELEASE}.tar.gz https://uploads.github.com/repos/cordys/cordys/releases/${id}/assets?name=cordys-crm-ce-online-installer-${RELEASE}.tar.gz
+                                # curl -XPOST -H "Authorization:token \$TOKEN" -H "Content-Type:application/octet-stream" --data-binary @cordys-crm-ce-online-installer-${RELEASE}.tar.gz https://uploads.github.com/repos/cordys/cordys/releases/${id}/assets?name=cordys-crm-ce-online-installer-${RELEASE}.tar.gz
 
                                 # 上传到OSS存储
-                                #ossutil -c /opt/jenkins-home/cordys/config cp -f cordys-crm-ce-online-installer-${RELEASE}.tar.gz oss://resource-fit2cloud-com/cordys/cordys/releases/download/${RELEASE}/ --update
+                                # ossutil -c /opt/jenkins-home/cordys/config cp -f cordys-crm-ce-online-installer-${RELEASE}.tar.gz oss://resource-fit2cloud-com/cordys/cordys/releases/download/${RELEASE}/ --update
                             """
                         }
                     }
