@@ -218,7 +218,10 @@ pipeline {
                             ).trim()
 
                             // 提取 upload_url
-                            def uploadUrl = createReleaseResponse.split('"upload_url":')[1].split('"')[1].replaceAll("\\{\\?name,label\\}", "")
+                            def uploadUrl = sh(
+                                script: "echo '${createReleaseResponse}' | jq -r '.upload_url' | sed 's/{?name,label}//'",
+                                returnStdout: true
+                            ).trim()
                             echo "Upload URL: ${uploadUrl}"
                             echo "创建 Release 成功 cordys-crm-ce-online-installer-$RELEASE.tar.gz"
                             // 上传附件
