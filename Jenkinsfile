@@ -280,7 +280,7 @@ pipeline {
                         echo "RELEASE=${RELEASE}"
                         echo "ARCH=${ARCH}"
                     }
-                    sh script: """
+                    sh script: '''
                         # 准备docker相关文件
                         rm -rf docker/*
                         rm -rf docker
@@ -333,7 +333,7 @@ pipeline {
                         # 生成企业版MD5校验文件
                         md5sum -b cordys-crm-ee-offline-installer-${RELEASE}.tar.gz | awk '{print $1}' > cordys-crm-ee-offline-installer-${RELEASE}.tar.gz.md5
                         rm -rf images
-                    """
+                    '''
                 }
             }
         }
