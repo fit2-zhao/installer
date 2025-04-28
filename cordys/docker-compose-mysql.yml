@@ -16,7 +16,7 @@ services:
       - ${CORDYS_MYSQL_PORT}:3306
     volumes:
       - ${CORDYS_BASE}/cordys/conf/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ms-mysql-data:/var/lib/mysql
+      - cordys-mysql-data:/var/lib/mysql
     networks:
       - ms-network
     restart: always
@@ -26,7 +26,7 @@ services:
         condition: service_healthy
 
 volumes:
-  ms-mysql-data:
+  cordys-mysql-data:
     driver_opts:
       type: none
       device: ${CORDYS_BASE}/cordys/data/mysql

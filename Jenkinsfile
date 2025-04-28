@@ -45,7 +45,7 @@ pipeline {
         }
 
         // 阶段2：触发 GitHub Actions 构建镜像
-       /*  stage('Trigger GitHub Actions') {
+        stage('Trigger GitHub Actions') {
             steps {
                 // 使用GitHub Token进行身份验证
                     withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN')]) {
@@ -65,7 +65,7 @@ pipeline {
                                                curl -X POST -H "Authorization: Bearer $TOKEN" \\
                                                     -H "Accept: application/vnd.github.v3+json" \\
                                                     ${ceWorkflowApi} \\
-                                                    -d '{ "ref":"main", "inputs":{"dockerImageTag":"${RELEASE}", "architecture":"linux/amd64", "registry":"fit2cloud-registry","EXECUTE_START_SCRIPT":"false"}}'
+                                                    -d '{ "ref":"main", "inputs":{"dockerImageTag":"${RELEASE}", "architecture":"linux/amd64", "registry":"fit2cloud-registry"}}'
                                              """, returnStatus: true)
 
 
@@ -111,7 +111,7 @@ pipeline {
                                                    curl -X POST -H "Authorization: Bearer $TOKEN" \\
                                                         -H "Accept: application/vnd.github.v3+json" \\
                                                         ${eeWorkflowApi} \\
-                                                        -d '{ "ref":"main", "inputs":{"dockerImageTag":"${RELEASE}", "architecture":"linux/amd64","EXECUTE_START_SCRIPT":"false"}}'
+                                                        -d '{ "ref":"main", "inputs":{"dockerImageTag":"${RELEASE}", "architecture":"linux/amd64"}}'
                                                  """, returnStatus: true)
                                 if (eeResponse != 0) {
                                     error "企业版镜像构建工作流触发失败"
@@ -150,7 +150,7 @@ pipeline {
                     }
                 }
             }
-        } */
+        }
 
         // 阶段3：修改安装配置文件
         stage('Modify install conf') {
@@ -173,11 +173,6 @@ pipeline {
 
         // 阶段4：打包在线安装包
         stage('Package Online-install') {
-//             when {
-//                 anyOf {
-//                     tag pattern: "^v.*?(?<!-arm64)\$", comparator: "REGEXP";
-//                 }
-//             }
             steps {
                 dir('installer') {
                    sh script: """
@@ -199,29 +194,24 @@ pipeline {
 
         // 阶段5：发布到GitHub
         stage('Release') {
-            when { tag pattern: "^v.*?(?<!-arm64)\$", comparator: "REGEXP" }
             steps {
                 // 使用凭据中的GitHub token和代理设置
-                withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN'),
-                               string(credentialsId: 'CORDYS_HTTPS_PROXY', variable: 'CORDYS_HTTPS_PROXY')]) {
-                    withEnv(["TOKEN=$TOKEN", "CORDYS_HTTPS_PROXY=$CORDYS_HTTPS_PROXY"]) {
+                withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN')]) {
+                    withEnv(["TOKEN=$TOKEN"]) {
                         dir('installer') {
-                            sh script: '''
+                            sh script: """
                                 # 在GitHub上创建预发布版本
-                                release=$(curl -XPOST -H "Authorization:token $TOKEN" --data "{\\"tag_name\\": \\"${RELEASE}\\", \\"target_commitish\\": \\"${BRANCH_NAME}\\", \\"name\\": \\"${RELEASE}\\", \\"body\\": \\"\\", \\"draft\\": false, \\"prerelease\\": true}" https://api.github.com/repos/cordys/cordys/releases)
+                                release=$(curl -XPOST -H "Authorization:token $TOKEN" --data "{\\"tag_name\\": \\"${RELEASE}\\", \\"target_commitish\\": \\"${BRANCH_NAME}\\", \\"name\\": \\"${RELEASE}\\", \\"body\\": \\"\\", \\"draft\\": false, \\"prerelease\\": true}" https://api.github.com/repos/cordys-dev/cordys-crm/releases)
 
                                 # 获取创建的release ID
                                 id=$(echo "$release" | sed -n -e \'s/"id":\\ \\([0-9]\\+\\),/\\1/p\' | head -n 1 | sed \'s/[[:blank:]]//g\')
 
                                 # 上传在线安装包到GitHub Release
-                                curl -XPOST -H "Authorization:token $TOKEN" -H "Content-Type:application/octet-stream" --data-binary @cordys-crm-ce-online-installer-${RELEASE}.tar.gz https://uploads.github.com/repos/cordys/cordys/releases/${id}/assets?name=cordys-crm-ce-online-installer-${RELEASE}.tar.gz
+                                #curl -XPOST -H "Authorization:token $TOKEN" -H "Content-Type:application/octet-stream" --data-binary @cordys-crm-ce-online-installer-${RELEASE}.tar.gz https://uploads.github.com/repos/cordys/cordys/releases/${id}/assets?name=cordys-crm-ce-online-installer-${RELEASE}.tar.gz
 
                                 # 上传到OSS存储
-                                ossutil -c /opt/jenkins-home/cordys/config cp -f cordys-crm-ce-online-installer-${RELEASE}.tar.gz oss://resource-fit2cloud-com/cordys/cordys/releases/download/${RELEASE}/ --update
-
-                                # 为standalone仓库也创建release
-                                curl -XPOST -H "Authorization:token $TOKEN" --data "{\\"tag_name\\": \\"${RELEASE}\\", \\"target_commitish\\": \\"${BRANCH_NAME}\\", \\"name\\": \\"${RELEASE}\\", \\"body\\": \\"\\", \\"draft\\": false, \\"prerelease\\": true}" https://api.github.com/repos/cordys/cordys-standalone/releases
-                            '''
+                                #ossutil -c /opt/jenkins-home/cordys/config cp -f cordys-crm-ce-online-installer-${RELEASE}.tar.gz oss://resource-fit2cloud-com/cordys/cordys/releases/download/${RELEASE}/ --update
+                            """
                         }
                     }
                 }
@@ -230,15 +220,14 @@ pipeline {
 
         // 阶段6：打包离线安装包
         stage('Package Offline-install') {
-           // when { tag pattern: "^v.*", comparator: "REGEXP" }
             steps {
                 dir('installer') {
                     script {
                         // 定义需要拉取的Docker镜像列表
                         def images = ['mysql:8.0.41',
                                     'redis:7.2.7-alpine',
-                                    "cordys-crm-ce-offline:${RELEASE}",
-                                    "cordys-crm-ee-offline:${RELEASE}"
+                                    "cordys-crm-ce:${RELEASE}",
+                                    "cordys-crm-ee:${RELEASE}"
                                     ]
                         // 拉取所有需要的Docker镜像
                         for (image in images) {
@@ -251,14 +240,14 @@ pipeline {
                     sh script: """
                         # 保存社区版所需镜像
                         rm -rf images && mkdir images && cd images
-                        docker save ${IMAGE_PREFIX}/cordys-crm-ce-offline:${RELEASE} \\
+                        docker save ${IMAGE_PREFIX}/cordys-crm-ce:${RELEASE} \\
                         ${IMAGE_PREFIX}/mysql:8.0.41 \\
                         ${IMAGE_PREFIX}/redis:7.2.7-alpine > cordys-crm.tar
                         cd ..
 
                         # 保存企业版所需镜像
                         rm -rf enterprise && mkdir enterprise && cd enterprise
-                        docker save ${IMAGE_PREFIX}/cordys-crm-ee-offline:${RELEASE} \\
+                        docker save ${IMAGE_PREFIX}/cordys-crm-ee:${RELEASE} \\
                         ${IMAGE_PREFIX}/mysql:8.0.41 \\
                         ${IMAGE_PREFIX}/redis:7.2.7-alpine > cordys-crm.tar
                         cd ..
