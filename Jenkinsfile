@@ -203,7 +203,7 @@ pipeline {
                                 id=$(echo "$release" | sed -n -e \'s/"id":\\ \\([0-9]\\+\\),/\\1/p\' | head -n 1 | sed \'s/[[:blank:]]//g\')
                                 curl -XPOST -H "Authorization:token $TOKEN" -H "Content-Type:application/octet-stream" --data-binary @metersphere-ce-online-installer-${RELEASE}.tar.gz https://uploads.github.com/repos/cordys-dev/cordys-crm/releases/${id}/assets?name=cordys-crm-ce-online-installer-${RELEASE}.tar.gz
 
-                                ossutil -c /opt/jenkins-home/metersphere/config cp -f metersphere-ce-online-installer-${RELEASE}.tar.gz oss://resource-fit2cloud-com/cordys/cordys-crm/releases/download/${RELEASE}/ --update
+                               # ossutil -c /opt/jenkins-home/cordys/config cp -f cordys-crm-ce-online-installer-${RELEASE}.tar.gz oss://resource-fit2cloud-com/cordys/cordys-crm/releases/download/${RELEASE}/ --update
                             '''
                         }
                     }
