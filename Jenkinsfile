@@ -199,35 +199,11 @@ pipeline {
                     withEnv(["TOKEN=$TOKEN"]) {
                         dir('installer') {
                             sh script: """
-                                release_data=$(jq -n \
-                                  --arg tag "$RELEASE" \
-                                  --arg branch "$BRANCH_NAME" \
-                                  '{
-                                    tag_name: $tag,
-                                    target_commitish: $branch,
-                                    name: $tag,
-                                    body: "",
-                                    draft: false,
-                                    prerelease: true
-                                  }')
+                                release=$(curl -XPOST -H "Authorization:token $TOKEN" --data "{\"tag_name\": \"${RELEASE}\", \"target_commitish\": \"${BRANCH_NAME}\", \"name\": \"${RELEASE}\", \"body\": \"\", \"draft\": false, \"prerelease\": true}" https://api.github.com/repos/cordys-dev/cordys-crm/releases)
+                                id=$(echo "$release" | sed -n -e \'s/"id":\([0-9]\+\),/\1/p\' | head -n 1 | sed \'s/[[:blank:]]//g\')
+                                curl -XPOST -H "Authorization:token $TOKEN" -H "Content-Type:application/octet-stream" --data-binary @metersphere-ce-online-installer-${RELEASE}.tar.gz https://uploads.github.com/repos/cordys-dev/cordys-crm/releases/${id}/assets?name=cordys-crm-ce-online-installer-${RELEASE}.tar.gz
 
-                                # 创建Release并获取响应
-                                response=$(curl -fsS -X POST \
-                                  -H "Authorization: token $TOKEN" \
-                                  -H "Content-Type: application/json" \
-                                  -d "$release_data" \
-                                  https://api.github.com/repos/cordys-dev/cordys-crm/releases)
-
-                                # 使用jq提取release_id（需提前安装jq）
-                                release_id=$(echo "$response" | jq -r '.id')
-
-                                # 上传构建产物（修正文件名）
-                                curl -fsS -X POST \
-                                  -H "Authorization: token $TOKEN" \
-                                  -H "Content-Type: application/octet-stream" \
-                                  --data-binary @"cordys-crm-ce-online-installer-${RELEASE}.tar.gz" \
-                                  "https://uploads.github.com/repos/cordys-dev/cordys-crm/releases/${release_id}/assets?name=cordys-crm-ce-online-installer-${RELEASE}.tar.gz"
-
+                               # ossutil -c /opt/jenkins-home/cordys/config cp -f cordys-crm-ce-online-installer-${RELEASE}.tar.gz oss://resource-fit2cloud-com/cordys/cordys-crm/releases/download/${RELEASE}/ --update
                             """
                         }
                     }
