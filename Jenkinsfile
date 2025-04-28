@@ -193,14 +193,55 @@ pipeline {
         }
  */
         // 阶段5：发布到GitHub
+        stage('Release and Upload Asset') {
+            steps {
+                withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN')]) {
+                    script {
+                        // 创建 release
+                        def createReleaseResponse = sh(
+                            script: """
+                                curl -sSL -X POST \
+                                    -H "Accept: application/vnd.github+json" \
+                                    -H "Authorization: Bearer ${TOKEN}" \
+                                    -H "Content-Type: application/json" \
+                                    -d '{
+                                        "tag_name": "${RELEASE}",
+                                        "name": "${BRANCH_NAME}",
+                                        "body": "${BRANCH_NAME}",
+                                        "draft": false,
+                                        "prerelease": false
+                                    }' \
+                                    https://api.github.com/repos/cordys-dev/cordys-crm/releases
+                            """,
+                            returnStdout: true
+                        ).trim()
+
+                        // 提取 upload_url
+                        def uploadUrl = createReleaseResponse.split('"upload_url":')[1].split('"')[1].replaceAll("\\{\\?name,label\\}", "")
+                        echo "Upload URL: ${uploadUrl}"
+
+                        // 上传附件
+                        sh """
+                            curl -sSL -X POST \
+                                -H "Accept: application/vnd.github+json" \
+                                -H "Authorization: Bearer ${TOKEN}" \
+                                -H "Content-Type: application/octet-stream" \
+                                --data-binary @cordys-crm-ce-online-installer-$RELEASE.tar.gz \
+                                "${uploadUrl}?name=cordys-crm-ce-online-installer-$RELEASE.tar.gz"
+                        """
+                    }
+                }
+            }
+        }
+
         stage('Release') {
             steps {
                 withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN')]) {
                     withEnv(["TOKEN=$TOKEN"]) {
                         dir('installer') {
                             sh script: '''
-                                release_v=$(curl -XPOST -H "Authorization:token $TOKEN" --data "{\\"tag_name\\": "v1.0.0", \\"target_commitish\\": \\"$BRANCH_NAME\\", \\"name\\": \\"$RELEASE\\", \\"body\\": \\"\\", \\"draft\\": false, \\"prerelease\\": true}" https://api.github.com/repos/cordys-dev/cordys-crm/releases)
-                                id=$(echo "$release_v" | sed -n -e 's/"id":\\([0-9]\\+\\),/\\1/p' | head -n 1 | sed 's/[[:blank:]]//g')
+                                release=$(curl -XPOST -H "Authorization:token $TOKEN" --data "{\\"tag_name\\": "v1.0.0", \\"target_commitish\\": \\"$BRANCH_NAME\\", \\"name\\": \\"$RELEASE\\", \\"body\\": \\"\\", \\"draft\\": false, \\"prerelease\\": true}" https://api.github.com/repos/cordys-dev/cordys-crm/releases)
+                                id=$(echo "$release" | sed -n -e 's/"id":\\([0-9]\\+\\),/\\1/p' | head -n 1 | sed 's/[[:blank:]]//g')
                                 curl -XPOST -H "Authorization:token $TOKEN" -H "Content-Type:application/octet-stream" --data-binary @cordys-crm-ce-online-installer-$RELEASE.tar.gz "https://uploads.github.com/repos/cordys-dev/cordys-crm/releases/$id/assets?name=cordys-crm-ce-online-installer-$RELEASE.tar.gz"
                                 # ossutil -c /opt/jenkins-home/cordys/config cp -f cordys-crm-ce-online-installer-$RELEASE.tar.gz oss://resource-fit2cloud-com/cordys/cordys-crm/releases/download/$RELEASE/ --update
                             '''
