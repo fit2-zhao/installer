@@ -199,32 +199,31 @@ pipeline {
                 withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN')]) {
                     withEnv(["TOKEN=$TOKEN"]) {
                         dir('installer') {
-                            sh script: """
-                               # 在GitHub上创建预发布版本
-                               release=$(curl -XPOST -H "Authorization:token $TOKEN" \
-                               --data '{
-                                 "tag_name": "'"${RELEASE}"'",
-                                 "target_commitish": "'"${BRANCH_NAME}"'",
-                                 "name": "'"${RELEASE}"'",
-                                 "body": "",
-                                 "draft": false,
-                                 "prerelease": true
-                               }' \
-                               https://api.github.com/repos/cordys-dev/cordys-crm/releases)
+                        sh '''#!/bin/sh
+                        # 在GitHub上创建预发布版本
+                        release=$(curl -XPOST -H "Authorization:token $TOKEN" \\
+                        --data \'{
+                          "tag_name": "'"${RELEASE}"'",
+                          "target_commitish": "'"${BRANCH_NAME}"'",
+                          "name": "'"${RELEASE}"'",
+                          "body": "",
+                          "draft": false,
+                          "prerelease": true
+                        }\' \\
+                        https://api.github.com/repos/cordys-dev/cordys-crm/releases)
 
-                               # 获取创建的release ID
-                               id=$(echo "$release" | sed -n -e 's/"id":\ \([0-9]\+\),/\1/p' | head -n 1 | sed 's/[[:blank:]]//g')
+                        # 获取创建的release ID
+                        id=$(echo "$release" | sed -n -e \'s/"id":\\s*\\([0-9]\\+\\),/\\1/p\' | head -n 1)
 
-                               # 上传在线安装包到GitHub Release
-                               # curl -XPOST -H "Authorization:token $TOKEN" -H "Content-Type:application/octet-stream" \
-                               # --data-binary @cordys-crm-ce-online-installer-${RELEASE}.tar.gz \
-                               # "https://uploads.github.com/repos/cordys-dev/cordys-crm/releases/${id}/assets?name=cordys-crm-ce-online-installer-${RELEASE}.tar.gz"
+                        # 上传在线安装包到GitHub Release
+                        #curl -XPOST -H "Authorization:token $TOKEN" -H "Content-Type:application/octet-stream" \\
+                        #--data-binary @cordys-crm-ce-online-installer-${RELEASE}.tar.gz \\
+                        #"https://uploads.github.com/repos/cordys-dev/cordys-crm/releases/${id}/assets?name=cordys-crm-ce-online-installer-${RELEASE}.tar.gz"
 
-                               # 上传到OSS存储
-                               # ossutil -c /opt/jenkins-home/cordys/config cp -f cordys-crm-ce-online-installer-${RELEASE}.tar.gz \
-                               # oss://resource-fit2cloud-com/cordys/cordys/releases/download/${RELEASE}/ --update
-                            """
-                        }
+                        # 上传到OSS存储
+                        #ossutil -c /opt/jenkins-home/cordys/config cp -f cordys-crm-ce-online-installer-${RELEASE}.tar.gz \\
+                        #oss://resource-fit2cloud-com/cordys/cordys/releases/download/${RELEASE}/ --update
+                        '''                        }
                     }
                 }
             }
