@@ -45,7 +45,7 @@ pipeline {
         }
 
         // 阶段2：触发 GitHub Actions 构建镜像
-       /*  stage('Trigger GitHub Actions') {
+        stage('Trigger GitHub Actions') {
             steps {
                 // 使用GitHub Token进行身份验证
                     withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN')]) {
@@ -191,7 +191,6 @@ pipeline {
                 }
             }
         }
- */
         // 阶段5：发布到GitHub
         stage('Release and Upload Asset') {
             steps {
@@ -235,7 +234,7 @@ pipeline {
             }
         }
         // 阶段6：打包离线安装包
-        /* stage('Package Offline-install') {
+        stage('Package Offline-install') {
             steps {
                 dir('installer') {
                     script {
@@ -341,7 +340,7 @@ pipeline {
                     """
                 }
             }
-        } */
+        }
 
         // 阶段7：上传离线安装包到OSS
 //         stage('Upload') {
