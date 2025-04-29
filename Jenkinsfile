@@ -159,7 +159,9 @@ pipeline {
                 dir('installer') {
                     sh script: '''
                         # 清理当前工作空间
+                        shopt -s extglob
                         rm -rf !(conf)
+                        shopt -u extglob
 
                         # 修改安装配置文件中的镜像标签和前缀
                         sed -i -e "s#CORDYS_IMAGE_TAG=.*#CORDYS_IMAGE_TAG=${RELEASE}#g" ./conf/install.conf
