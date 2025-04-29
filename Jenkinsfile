@@ -7,13 +7,7 @@ pipeline {
             label params.label == "" ? "cordys" : params.label
         }
     }
-    
-    // 全局选项配置
-    options {
-        // 将代码检出到installer子目录
-        checkoutToSubdirectory('installer')
-    }
-    
+
     // 环境变量设置
     environment {
         // Docker镜像前缀
