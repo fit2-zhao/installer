@@ -8,6 +8,12 @@ pipeline {
         }
     }
 
+    // 全局选项配置
+    options {
+        // 将代码检出到installer子目录
+        checkoutToSubdirectory('installer/conf')
+    }
+
     // 环境变量设置
     environment {
         // Docker镜像前缀
@@ -152,15 +158,15 @@ pipeline {
             steps {
                 dir('installer') {
                     sh script: '''
-                        # 清理旧的安装包
-                        rm -rf cordys-*.tar.gz
+                        # 清理当前工作空间
+                        rm -rf !(conf)
 
                         # 修改安装配置文件中的镜像标签和前缀
-                        sed -i -e "s#CORDYS_IMAGE_TAG=.*#CORDYS_IMAGE_TAG=${RELEASE}#g" install.conf
-                        sed -i -e "s#CORDYS_IMAGE_PREFIX=.*#CORDYS_IMAGE_PREFIX=${IMAGE_PREFIX}#g" install.conf
+                        sed -i -e "s#CORDYS_IMAGE_TAG=.*#CORDYS_IMAGE_TAG=${RELEASE}#g" ./conf/install.conf
+                        sed -i -e "s#CORDYS_IMAGE_PREFIX=.*#CORDYS_IMAGE_PREFIX=${IMAGE_PREFIX}#g" ./conf/install.conf
 
                         # 将版本号写入version文件
-                        echo ${RELEASE} > ./cordys/version
+                        echo ${RELEASE} > ./conf/cordys/version
                     '''
                 }
             }
@@ -171,17 +177,8 @@ pipeline {
             steps {
                 dir('installer') {
                    sh script: """
-                       touch cordys-crm-ce-online-installer-${RELEASE}.tar.gz
-                       tar --transform "s/^\\./cordys-crm-ce-online-installer-${RELEASE}/" \\
-                           --exclude cordys-crm-ce-online-installer-${RELEASE}.tar.gz \\
-                           --exclude cordys-crm-ce-offline-installer-${RELEASE}.tar.gz \\
-                           --exclude cordys-crm-ce-release-${RELEASE}.tar.gz \\
-                           --exclude .git \\
-                           --exclude images \\
-                           --exclude community \\
-                           --exclude enterprise \\
-                           --exclude docker \\
-                           -czvf cordys-crm-ce-online-installer-${RELEASE}.tar.gz .
+                            tar --transform "s|^|cordys-crm-ce-online-installer-${RELEASE}/|" \\
+                                -czvf cordys-crm-ce-online-installer-${RELEASE}.tar.gz -C conf .
                    """
                 }
             }
