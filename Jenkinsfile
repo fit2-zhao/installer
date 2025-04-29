@@ -35,7 +35,11 @@ pipeline {
 
         // 阶段2：触发 GitHub Actions 构建镜像
         stage('Trigger GitHub Actions') {
-            when { tag pattern: "^v.*", comparator: "REGEXP" }
+            when {
+                expression {
+                    return env.ARCH ==~ /^x86.*/
+                }
+            }
             steps {
                 // 使用GitHub Token进行身份验证
                     withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN')]) {
@@ -165,6 +169,11 @@ pipeline {
 
         // 阶段4：打包在线安装包
         stage('Package Online-install') {
+            when {
+                expression {
+                    return env.ARCH ==~ /^x86.*/
+                }
+            }
             steps {
                 dir('installer') {
                    sh script: """
@@ -176,7 +185,7 @@ pipeline {
         }
         // 阶段5：发布到GitHub
         stage('Release and Upload Asset') {
-              when {
+            when {
                 expression {
                     return env.ARCH ==~ /^x86.*/
                 }
