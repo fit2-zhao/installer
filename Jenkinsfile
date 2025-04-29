@@ -260,13 +260,11 @@ pipeline {
                     }
                     sh script: """
                         # 保存社区版所需镜像
-                        echo ‘保存社区版所需镜像’
                         rm -rf images && mkdir images && cd images
                         docker save ${IMAGE_PREFIX}/cordys-crm-ce:${RELEASE} > cordys-crm.tar
                         cd ..
 
                         # 保存企业版所需镜像
-                        echo ‘保存企业版所需镜像’
                         rm -rf enterprise && mkdir enterprise && cd enterprise
                         docker save ${IMAGE_PREFIX}/cordys-crm-ee:${RELEASE} > cordys-crm.tar
                         cd ..
@@ -319,7 +317,7 @@ pipeline {
                         # 准备企业版镜像
                         mv enterprise images
                         # 修改配置文件中的-ce为-ee
-                        sed -i -e 's#-ce#-ee#g' cordys/docker-compose-cordys.yml
+                        #sed -i -e 's#-ce#-ee#g' cordys/docker-compose-cordys.yml
 
                         # 添加企业版特有配置
                         echo '# 企业版配置' >> install.conf
