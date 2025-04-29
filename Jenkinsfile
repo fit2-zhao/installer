@@ -235,6 +235,8 @@ pipeline {
         }
         // 阶段6：打包离线安装包
         stage('Package Offline-install') {
+                    when { tag pattern: "^v.*", comparator: "REGEXP" }
+
             steps {
                 dir('installer') {
                     script {
