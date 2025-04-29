@@ -305,7 +305,7 @@ pipeline {
 
                         # 生成企业版MD5校验文件
                         md5sum -b cordys-crm-ee-offline-installer-${RELEASE}.tar.gz | awk '{print \$1}' > cordys-crm-ee-offline-installer-${RELEASE}.tar.gz.md5
-                        rm -rf images
+                        rm -rf images conf
                     """
                 }
             }
