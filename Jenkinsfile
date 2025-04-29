@@ -260,11 +260,13 @@ pipeline {
                     }
                     sh script: """
                         # 保存社区版所需镜像
+                        echo ‘保存社区版所需镜像’
                         rm -rf images && mkdir images && cd images
                         docker save ${IMAGE_PREFIX}/cordys-crm-ce:${RELEASE} > cordys-crm.tar
                         cd ..
 
                         # 保存企业版所需镜像
+                        echo ‘保存企业版所需镜像’
                         rm -rf enterprise && mkdir enterprise && cd enterprise
                         docker save ${IMAGE_PREFIX}/cordys-crm-ee:${RELEASE} > cordys-crm.tar
                         cd ..
