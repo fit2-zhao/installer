@@ -287,7 +287,7 @@ pipeline {
                         rm -rf docker-25.0.2.tgz
                         mv docker bin && mkdir docker && mv bin docker/
                         mv docker-compose docker/bin
-                        mkdir docker/service && mv docker.service docker/service/
+                        mkdir docker/service && mv ./conf/docker.service docker/service/
 
                         # 保存社区版所需镜像
                         rm -rf images && mkdir images && cd images
@@ -295,16 +295,12 @@ pipeline {
                         cd ..
 
                         # 打包社区版离线安装包
-                        tar --transform 's/^\\./cordys-crm-ce-offline-installer-${RELEASE}/' \\
-                            --exclude-vcs \\
-                            --exclude='installer*' \\
-                            -C .. . \\
-                            -C installer images docker \\
-                            -czvf cordys-crm-ce-offline-installer-${RELEASE}.tar.gz
+                        tar --transform "s|^|cordys-crm-ce-online-installer-${RELEASE}/|" \\
+                            -czvf cordys-crm-ce-online-installer-${RELEASE}.tar.gz \\
+                            docker images -C conf .
 
                         # 生成MD5校验文件
                         md5sum -b cordys-crm-ce-offline-installer-${RELEASE}.tar.gz | awk '{print \$1}' > cordys-crm-ce-offline-installer-${RELEASE}.tar.gz.md5
-                        rm -rf images
 
                        # 准备企业版镜像
                        rm -rf images && mkdir images && cd images
@@ -312,16 +308,13 @@ pipeline {
                        cd ..
 
                         # 添加企业版特有配置
-                        echo '# 企业版配置' >> install.conf
-                        echo 'CORDYS_ENTERPRISE_ENABLE=true' >> install.conf
+                        echo '# 企业版配置' >> ./conf/install.conf
+                        echo 'CORDYS_ENTERPRISE_ENABLE=true' >> ./conf/install.conf
 
                         # 打包企业版离线安装包
-                        tar --transform 's/^\\./cordys-crm-ee-offline-installer-${RELEASE}/' \\
-                            --exclude-vcs \\
-                            --exclude='installer*' \\
-                            -C .. . \\
-                            -C installer images docker \\
-                            -czvf cordys-crm-ee-offline-installer-${RELEASE}.tar.gz
+                        tar --transform "s|^|cordys-crm-ee-online-installer-${RELEASE}/|" \\
+                          -czvf cordys-crm-ee-online-installer-${RELEASE}.tar.gz \\
+                          docker images -C conf .
 
                         # 生成企业版MD5校验文件
                         md5sum -b cordys-crm-ee-offline-installer-${RELEASE}.tar.gz | awk '{print \$1}' > cordys-crm-ee-offline-installer-${RELEASE}.tar.gz.md5
