@@ -366,12 +366,12 @@ pipeline {
     }
 
     // 后置处理：发送通知
-    post('Notification') {
-        always {
-            // 使用企业微信webhook发送构建结果通知
-            withCredentials([string(credentialsId: 'wechat-bot-webhook', variable: 'WEBHOOK')]) {
-                qyWechatNotification failNotify: true, mentionedId: '', mentionedMobile: '', webhookUrl: "$WEBHOOK"
-            }
-        }
-    }
+//     post('Notification') {
+//         always {
+//             // 使用企业微信webhook发送构建结果通知
+//             withCredentials([string(credentialsId: 'wechat-bot-webhook', variable: 'WEBHOOK')]) {
+//                 qyWechatNotification failNotify: true, mentionedId: '', mentionedMobile: '', webhookUrl: "$WEBHOOK"
+//             }
+//         }
+//     }
 }
