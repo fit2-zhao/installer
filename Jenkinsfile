@@ -235,8 +235,6 @@ pipeline {
         }
         // 阶段6：打包离线安装包
         stage('Package Offline-install') {
-                    when { tag pattern: "^v.*", comparator: "REGEXP" }
-
             steps {
                 dir('installer') {
                     script {
@@ -253,17 +251,6 @@ pipeline {
                             }
                         }
                     }
-                    /* sh script: """
-                        # 保存社区版所需镜像
-                        rm -rf images && mkdir images && cd images
-                        docker save ${IMAGE_PREFIX}/cordys-crm-ce:${RELEASE} > cordys-crm.tar
-                        cd ..
-
-                        # 保存企业版所需镜像
-                        rm -rf enterprise && mkdir enterprise && cd enterprise
-                        docker save ${IMAGE_PREFIX}/cordys-crm-ee:${RELEASE} > cordys-crm.tar
-                        cd ..
-                    """ */
                     script {
                         // 处理架构信息（x86_64或arm64）
                         ARCH = "x86_64"
@@ -279,8 +266,6 @@ pipeline {
                     }
                     sh script: """
                         # 准备docker相关文件
-                        rm -rf docker *//*
-                        rm -rf docker
 
                         # 下载对应架构的docker和docker-compose
                         wget https://resource.fit2cloud.com/docker/download/${ARCH}/docker-25.0.2.tgz
@@ -289,7 +274,7 @@ pipeline {
                         rm -rf docker-25.0.2.tgz
                         mv docker bin && mkdir docker && mv bin docker/
                         mv docker-compose docker/bin
-                        mkdir docker/service && mv conf/docker.service docker/service/
+                        mkdir docker/service && mv ./conf/docker.service docker/service/
 
                         # 保存社区版所需镜像
                         rm -rf images && mkdir images && cd images
