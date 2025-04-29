@@ -157,7 +157,7 @@ pipeline {
         stage('Modify install conf') {
             steps {
                 dir('installer') {
-                    sh script: '''
+                    sh script: """
                         # 清理当前工作空间
                         shopt -s extglob
                         rm -rf !(conf)
@@ -169,7 +169,7 @@ pipeline {
 
                         # 将版本号写入version文件
                         echo ${RELEASE} > ./conf/cordys/version
-                    '''
+                    """
                 }
             }
         }
