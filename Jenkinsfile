@@ -287,7 +287,7 @@ pipeline {
                         rm -rf docker-25.0.2.tgz
                         mv docker bin && mkdir docker && mv bin docker/
                         mv docker-compose docker/bin
-                        mkdir docker/service && mv /conf/docker.service docker/service/
+                        mkdir docker/service && mv conf/docker.service docker/service/
 
                         # 保存社区版所需镜像
                         rm -rf images && mkdir images && cd images
