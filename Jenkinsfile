@@ -28,7 +28,7 @@ pipeline {
                 script {
                     // 打印当前版本和分支信息
                     echo "RELEASE=${RELEASE}"
-                    echo "BRANCH=${BRANCH_NAME}"
+                    echo "BRANCH=${BRANCH}"
                 }
             }
         }
@@ -190,7 +190,7 @@ pipeline {
                                         -d '{
                                             "tag_name": "${RELEASE}",
                                             "name": "${RELEASE}",
-                                            "body": "${BRANCH_NAME}",
+                                            "body": "${BRANCH}",
                                             "draft": false,
                                             "prerelease": true
                                         }' \
