@@ -26,17 +26,6 @@ pipeline {
         stage('Preparation') {
             steps {
                 script {
-                    // 如果提供了branch参数，则设置BRANCH_NAME环境变量
-                    if (params.branch != null) {
-                        env.BRANCH_NAME = params.branch
-                    }
-                    // 处理release参数，移除-arm64后缀
-                    if (params.release != null) {
-                        env.RELEASE = params.release.replace("-arm64", "")
-                    } else {
-                        env.RELEASE = env.BRANCH_NAME
-                    }
-
                     // 打印当前版本和分支信息
                     echo "RELEASE=${RELEASE}"
                     echo "BRANCH=${BRANCH_NAME}"
@@ -251,23 +240,11 @@ pipeline {
                             }
                         }
                     }
-                    script {
-                        // 处理架构信息（x86_64或arm64）
-                        ARCH = "x86_64"
-                        echo "TAG_NAME: $TAG_NAME"
-
-                        if (env.TAG_NAME != null) {
-                            if (env.TAG_NAME.endsWith("-arm64")) {
-                                ARCH = "aarch64"
-                            }
-                        }
-                        env.RELEASE = "${RELEASE}"
-                        env.ARCH = "${ARCH}"
-                        echo "RELEASE=${RELEASE}"
-                        echo "ARCH=${ARCH}"
-                    }
                     sh script: """
                         # 准备docker相关文件
+
+                        echo "RELEASE=${RELEASE}"
+                        echo "ARCH=${ARCH}"
 
                         # 下载对应架构的docker和docker-compose
                         wget https://resource.fit2cloud.com/docker/download/${ARCH}/docker-25.0.2.tgz
