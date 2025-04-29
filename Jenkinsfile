@@ -271,15 +271,11 @@ pipeline {
                     """ */
                     script {
                         // 处理架构信息（x86_64或arm64）
-                        RELEASE = ""
                         ARCH = "x86_64"
                         if (env.TAG_NAME != null) {
-                            RELEASE = env.TAG_NAME
                             if (RELEASE.endsWith("-arm64")) {
                                 ARCH = "aarch64"
                             }
-                        } else {
-                            RELEASE = env.BRANCH_NAME
                         }
                         env.RELEASE = "${RELEASE}"
                         env.ARCH = "${ARCH}"
