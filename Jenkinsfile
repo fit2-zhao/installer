@@ -176,6 +176,7 @@ pipeline {
         }
         // 阶段5：发布到GitHub
         stage('Release and Upload Asset') {
+            when { arch pattern: "^x86_*", comparator: "REGEXP" }
             steps {
                 withCredentials([string(credentialsId: 'ZY-GITHUB-TOKEN', variable: 'TOKEN')]) {
                     dir('installer') {
