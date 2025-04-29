@@ -254,8 +254,10 @@ pipeline {
                     script {
                         // 处理架构信息（x86_64或arm64）
                         ARCH = "x86_64"
+                        echo "TAG_NAME: $TAG_NAME"
+
                         if (env.TAG_NAME != null) {
-                            if (RELEASE.endsWith("-arm64")) {
+                            if (env.TAG_NAME.endsWith("-arm64")) {
                                 ARCH = "aarch64"
                             }
                         }
