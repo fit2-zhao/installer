@@ -37,7 +37,7 @@ pipeline {
         stage('Trigger GitHub Actions') {
             when {
                 expression {
-                    return false //env.ARCH ==~ /^x86.*/
+                    return env.ARCH ==~ /^x86.*/
                 }
             }
             steps {
@@ -171,7 +171,7 @@ pipeline {
         stage('Package Online-install') {
             when {
                 expression {
-                    return false //env.ARCH ==~ /^x86.*/
+                    return env.ARCH ==~ /^x86.*/
                 }
             }
             steps {
@@ -187,7 +187,7 @@ pipeline {
         stage('Release and Upload Asset') {
             when {
                 expression {
-                    return false //env.ARCH ==~ /^x86.*/
+                    return env.ARCH ==~ /^x86.*/
                 }
             }
             steps {
@@ -275,8 +275,8 @@ pipeline {
                         cd ..
 
                         # 打包社区版离线安装包
-                        tar --transform "s|^|cordys-crm-ce-online-installer-${RELEASE}-${ARCH}/|" \\
-                            -czvf cordys-crm-ce-online-installer-${RELEASE}-${ARCH}.tar.gz \\
+                        tar --transform "s|^|cordys-crm-ce-offline-installer-${RELEASE}-${ARCH}/|" \\
+                            -czvf cordys-crm-ce-offline-installer-${RELEASE}-${ARCH}.tar.gz \\
                             docker images -C conf .
 
                         # 生成MD5校验文件
@@ -292,8 +292,8 @@ pipeline {
                         echo 'CORDYS_ENTERPRISE_ENABLE=true' >> ./conf/install.conf
 
                         # 打包企业版离线安装包
-                        tar --transform "s|^|cordys-crm-ee-online-installer-${RELEASE}-${ARCH}/|" \\
-                          -czvf cordys-crm-ee-online-installer-${RELEASE}-${ARCH}.tar.gz \\
+                        tar --transform "s|^|cordys-crm-ee-offline-installer-${RELEASE}-${ARCH}/|" \\
+                          -czvf cordys-crm-ee-offline-installer-${RELEASE}-${ARCH}.tar.gz \\
                           docker images -C conf .
 
                         # 生成企业版MD5校验文件
