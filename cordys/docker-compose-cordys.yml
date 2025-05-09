@@ -1,7 +1,7 @@
 version: "3"
 services:
   cordys:
-    image: ${CORDYS_IMAGE_PREFIX}/cordys-crm-ce:${CORDYS_IMAGE_TAG}
+    image: ${CORDYS_IMAGE_PREFIX}/${CORDYS_IMAGE_NAME}:${CORDYS_IMAGE_TAG}
     container_name: cordys-crm
     deploy:
       resources:
