@@ -56,7 +56,7 @@ pipeline {
                                                curl -X POST -H "Authorization: Bearer $TOKEN" \\
                                                     -H "Accept: application/vnd.github.v3+json" \\
                                                     ${ceWorkflowApi} \\
-                                                    -d '{ "ref":"main", "inputs":{"dockerImageTag":"${RELEASE}", "architecture":"${ARCHITECTURE}", "registry":"fit2cloud-registry", "csBranch":"${BRANCH}"}}'
+                                                    -d '{ "ref":"main", "inputs":{"dockerImageTag":"${RELEASE}", "architecture":"${ARCHITECTURE}", "csBranch":"${BRANCH}"}}'
                                              """, returnStatus: true)
 
 
